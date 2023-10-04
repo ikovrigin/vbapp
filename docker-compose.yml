@@ -10,6 +10,8 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./frontend
+    volumes:
+      - dist:/dist/src/app/dist/frontend
   proxy:
     image: nginx:alpine
     depends_on:
@@ -18,6 +20,7 @@ services:
     ports:
       - 80:81
     volumes:
+      - dist:/usr/share/nginx/html:ro
       - type: bind
         source: ./proxy/nginx-proxy.conf
         target: /etc/nginx/conf.d/proxy.conf
@@ -27,3 +30,5 @@ services:
       - type: bind
         source: ./proxy/app.key
         target: /etc/ssl/private/app.key
+volumes:
+  dist:
