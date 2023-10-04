@@ -1,0 +1,41 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: sa-east-1
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      working-directory: ./frontend/src/app
+      run: npm install
+
+    - name: Run tests
+      working-directory: ./frontend/src/app
+      run: npm run test:headless
+
+    - name: Build
+      working-directory: ./frontend/src/app
+      run: npm run build --omit=dev
+
+    - name: Deploy
+      if: success()
+      run: aws s3 sync ./frontend/src/app/dist/frontend s3://vbapp-s3
