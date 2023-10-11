@@ -38,3 +38,10 @@ jobs:
         echo "Pushing image to ECR..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Update lambda function
+      id: update-lambda
+      env:
+        IMAGE_URI: ${{ steps.build-image.outputs.image }}
+      run: |
+        aws lambda update-function-code --function-name arn:aws:lambda:eu-north-1:822234535572:function:vbapp-lambda --image-uri $IMAGE_URI
